@@ -1,17 +1,27 @@
 ﻿@page "/"
+@inject IBookServices BS
 
-<TelerikButton OnClick="@SayHelloHandler" ThemeColor="primary">Say Hello</TelerikButton>
+<PageTitle>Books</PageTitle>
 
-<br />
-
-@helloString
+<TelerikGrid Data="@BS.Books"
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="@GridFilterMode.FilterRow"
+			 EditMode="@GridEditMode.Popup"
+>
+	<GridColumns>
+		<GridColumn Field="Title" Title="Book Title" />
+		<GridColumn Field="Author" Title="Author" />
+		<GridColumn Field="Genre.Name" Title="Genre" />
+		<GridColumn Field="Price" DisplayFormat="{0:C2}" />
+		<GridColumn Field="PublishedYear" DisplayFormat="{0:yyyy}" />
+	</GridColumns>
+</TelerikGrid>
 
 @code {
-    MarkupString helloString;
+	protected override async Task OnInitializedAsync()
+	{
+		await BS.GetBooks();
+	}
 
-    void SayHelloHandler()
-    {
-        string msg = string.Format("Hello from <strong>Telerik Blazor</strong> at {0}.<br /> Now you can use C# to write front-end!", DateTime.Now);
-        helloString = new MarkupString(msg);
-    }
 }
