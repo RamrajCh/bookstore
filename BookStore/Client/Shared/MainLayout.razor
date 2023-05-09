@@ -1,18 +1,97 @@
 ﻿@layout TelerikLayout
 @inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<div class="drawer-container">
+    <div class="custom-toolbar">
+        <span style="font-weight: bold; font-size: 25px;">Book Store</span>
     </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+    <TelerikDrawer @ref="Drawer" Data="Data" Mode="@DrawerMode.Push" Expanded="true" @bind-SelectedItem="SelectedItem">
+        <DrawerContent>
+            <div class="page">
+                @Body
+            </div>
+        </DrawerContent>
+    </TelerikDrawer>
 </div>
+
+@code {
+    public TelerikDrawer<DrawerItem>? Drawer { get; set; }
+    public DrawerItem? SelectedItem { get; set; }
+    public IEnumerable<DrawerItem> Data { get; set; } =
+        new List<DrawerItem>
+            {
+            new DrawerItem
+            {
+                Text = "Books",
+                Icon = FontIcon.Book
+            },
+            new DrawerItem { Separator = true},
+            new DrawerItem
+            {
+                Text = "Notifications",
+                Icon = FontIcon.Bell
+            },
+            new DrawerItem
+            {
+                Text = "Calendar",
+                Icon = FontIcon.Calendar
+            },
+            new DrawerItem { Separator = true},
+            new DrawerItem
+            {
+                Text = "Attachments",
+                Icon = FontIcon.EnvelopLink
+            },
+            new DrawerItem
+            {
+                Text = "Favourites",
+                Icon = FontIcon.StarOutline
+            }
+                };
+
+    protected override Task OnInitializedAsync()
+    {
+        SelectedItem = Data.First();
+
+        return base.OnInitializedAsync();
+    }
+
+    public class DrawerItem
+    {
+        public string? Text { get; set; }
+
+        public FontIcon? Icon { get; set; }
+
+        public string? Url { get; set; }
+
+        public bool Separator { get; set; }
+    }
+}
+
+<style>
+    
+
+    .k-drawer-container {
+        position: relative;
+        width: 100%;
+    }
+
+    .k-icon {
+        font-size: 20px;
+    }
+
+    .custom-toolbar {
+        width: 100%;
+        background-color: #f6f6f6;
+        line-height: 10px;
+        border-bottom: inset;
+        border-bottom-width: 1px;
+        padding: 15px;
+        color: #656565;
+    }
+
+    .page{
+        padding: 20px;
+    }
+</style>
+
