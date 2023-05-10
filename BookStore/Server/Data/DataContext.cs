@@ -15,8 +15,8 @@ namespace BookStore.Server.Data
 
 		public DbSet<Shared.Book> Books{ get; set; }
 		public DbSet<Genre> Genres { get; set; }
-
 		public DbSet<Customer> Customers { get; set; }
-
+		public DbSet<Sale> Sales { get; set; }
+		public DbSet<SalesItem> SalesItems { get; set; }
 	}
 }

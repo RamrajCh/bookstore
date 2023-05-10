@@ -1,0 +1,185 @@
+﻿@page "/salesitems"
+
+@using System.Globalization;
+@using Telerik.DataSource
+
+@inject ISalesItemService SalesItemService
+@inject ISaleService SaleService
+@inject IBookService BookService
+
+<PageTitle>Sales Items</PageTitle>
+
+<h1>Sales Items</h1>
+
+<Loader isLoaded="@isLoaded" />
+
+<TelerikGrid Class="grid"
+			 Data=@GridData
+			 OnUpdate="@UpdateHandler"
+			 OnDelete="@DeleteHandler"
+			 OnCreate="@CreateHandler"
+			 Groupable="true"
+			 ConfirmDelete="true"
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="GridFilterMode.FilterMenu"
+			 Resizable="true"
+			 Reorderable="true"
+			 EditMode="GridEditMode.Popup"
+			 PageSize="10"
+			 Navigable="true">
+
+	<GridToolBarTemplate>
+		<GridCommandButton Command="Add" Icon="@FontIcon.Plus" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Add New Sales Item</GridCommandButton>
+	</GridToolBarTemplate>
+	<GridSettings>
+		<GridPopupEditFormSettings Orientation="FormOrientation.Horizontal"></GridPopupEditFormSettings>
+	</GridSettings>
+
+	<GridColumns>
+		<GridColumn Field="SaleId" Title="Sale" Width="180px">
+			<Template>
+				@{
+					var salesItem = context as SalesItem;
+					var sale = SaleList.FirstOrDefault(g => g.SaleId == salesItem!.SaleId)?.SaleId;
+					@sale
+					;
+				}
+			</Template>
+			<EditorTemplate>
+				@{
+					var salesItem = context as SalesItem;
+					<TelerikDropDownList Data="@SaleList"
+									 	@bind-Value="@salesItem!.SaleId"
+									 DefaultText="Choose Sale"
+									 TextField="SaleId"
+									 ValueField="SaleId">
+					</TelerikDropDownList>
+				}
+			</EditorTemplate>
+			<GroupHeaderTemplate>
+				@{
+					if (context.Value != null)
+					{
+						var sale = SaleList.FirstOrDefault(c => c.SaleId == (int)context.Value);
+						<span>Sale: @sale!.SaleId by Customer: @sale.Customer!.Name</span>
+					}
+					else
+					{
+						<span>No Sale</span>
+					}
+				}
+			</GroupHeaderTemplate>
+		</GridColumn>
+
+		<GridColumn Field="BookId" Title="Book Name" Width="180px">
+			<Template>
+				@{
+					var salesItem = context as SalesItem;
+					var bookTitle = BookList.FirstOrDefault(g => g.BookId == salesItem!.BookId)?.Title;
+					@bookTitle;
+				}
+			</Template>
+			<EditorTemplate>
+				@{
+					var salesItem = context as SalesItem;
+					<TelerikDropDownList Data="@BookList"
+									 	@bind-Value="@salesItem!.BookId"
+									 DefaultText="Choose Book"
+									 TextField="Title"
+									 ValueField="BookId">
+					</TelerikDropDownList>
+				}
+			</EditorTemplate>
+			<GroupHeaderTemplate>
+				@{
+					if (context.Value != null)
+					{
+						<span>Book: @BookList.FirstOrDefault(c => c.BookId == (int)context.Value)?.Title</span>
+					}
+					else
+					{
+						<span>No Books</span>
+					}
+				}
+			</GroupHeaderTemplate>
+		</GridColumn>
+		<GridColumn Field="Quantity" Title="Quantity"  Width="140px" />
+		<GridColumn Field="UnitPrice" Title="Price per unit" TextAlign="@ColumnTextAlign.Right" Width="110px">
+			<Template>
+				@{
+					var salesItems = context as SalesItem;
+					@salesItems!.UnitPrice.ToString("C2", new CultureInfo("en-NP"))
+					;
+				}
+			</Template>
+		</GridColumn>
+
+		<GridCommandColumn Width="180px">
+			<GridCommandButton Command="Edit" Icon="@FontIcon.Pencil" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary">Edit</GridCommandButton>
+			<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
+		</GridCommandColumn>
+	</GridColumns>
+
+</TelerikGrid>
+
+
+@code {
+	private bool isLoaded = false;
+
+
+	public List<SalesItem> GridData { get; set; } = new List<SalesItem>();
+	public List<Sale> SaleList { get; set; } = new List<Sale>();
+	public List<Book> BookList { get; set; } = new List<Book>();
+
+	private async Task LoadData()
+	{
+		await SalesItemService.GetSalesItems();
+		GridData = SalesItemService.SalesItems;
+		await SaleService.GetSales();
+		SaleList = SaleService.Sales;
+		await BookService.GetBooks();
+		BookList = BookService.Books;
+		isLoaded = true;
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	public async Task CreateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var salesItem = (SalesItem)args.Item;
+		await SalesItemService.CreateSaleItem(salesItem);
+		await LoadData();
+
+	}
+
+	public async Task UpdateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var salesItem = (SalesItem)args.Item;
+		await SalesItemService.UpdateSaleItem(salesItem, salesItem.SalesItemId);
+		await LoadData();
+	}
+
+	public async Task DeleteHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var salesItem = (SalesItem)args.Item;
+		await SalesItemService.DeleteSaleItem(salesItem.SalesItemId);
+		await LoadData();
+	}
+}
+
+<style>
+	.width-100 {
+		width: 100%;
+	}
+
+	.grid .k-grid-content tr {
+		line-height: 32px;
+	}
+</style>

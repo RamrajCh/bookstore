@@ -1,0 +1,123 @@
+﻿@page "/sales"
+
+@using Telerik.DataSource
+
+@inject ISaleService SaleService
+@inject ICustomerService CustomerService
+
+<PageTitle>Sales</PageTitle>
+
+<h1>Sales</h1>
+
+<Loader isLoaded="@isLoaded" />
+
+<TelerikGrid Class="grid"
+			 Data=@GridData
+			 OnUpdate="@UpdateHandler"
+			 OnDelete="@DeleteHandler"
+			 OnCreate="@CreateHandler"
+			 ConfirmDelete="true"
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="GridFilterMode.FilterMenu"
+			 Resizable="true"
+			 Reorderable="true"
+			 EditMode="GridEditMode.Popup"
+			 PageSize="10"
+			 Navigable="true">
+
+	<GridToolBarTemplate>
+		<GridCommandButton Command="Add" Icon="@FontIcon.Plus" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Add New Sale</GridCommandButton>
+	</GridToolBarTemplate>
+	<GridSettings>
+		<GridPopupEditFormSettings Orientation="FormOrientation.Horizontal"></GridPopupEditFormSettings>
+	</GridSettings>
+
+	<GridColumns>
+		<GridColumn Field="Customer" Title="Customer" Width="180px">
+			<Template>
+				@{
+					var sale = context as Sale;
+					var customerName = CustomerList.FirstOrDefault(g => g.CustomerId == sale!.CustomerId)?.Name;
+					@customerName
+					;
+				}
+			</Template>
+			<EditorTemplate>
+				@{
+					var sale = context as Sale;
+					<TelerikDropDownList Data="@CustomerList"
+									 	@bind-Value="@sale!.CustomerId"
+									 DefaultText="Choose Customer"
+									 TextField="Name"
+									 ValueField="CustomerId">
+					</TelerikDropDownList>
+				}
+			</EditorTemplate>
+		</GridColumn>
+		<GridColumn Field="SaleDate" Title="Sale Date" DisplayFormat="{0:yyyy-MM-dd}" Width="140px" />
+
+		<GridCommandColumn Width="180px">
+			<GridCommandButton Command="Edit" Icon="@FontIcon.Pencil" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary">Edit</GridCommandButton>
+			<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
+		</GridCommandColumn>
+	</GridColumns>
+
+</TelerikGrid>
+
+
+@code {
+	private bool isLoaded = false;
+
+	public List<Sale> GridData { get; set; } = new List<Sale>();
+	public List<Customer> CustomerList { get; set; } = new List<Customer>();
+
+	private async Task LoadData()
+	{
+		await SaleService.GetSales();
+		GridData = SaleService.Sales;
+		await CustomerService.GetCustomers();
+		CustomerList = CustomerService.Customers;
+		isLoaded = true;
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	public async Task CreateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var sale = (Sale)args.Item;
+		await SaleService.CreateSale(sale);
+		await LoadData();
+
+	}
+
+	public async Task UpdateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var sale = (Sale)args.Item;
+		await SaleService.UpdateSale(sale, sale.SaleId);
+		await LoadData();
+	}
+
+	public async Task DeleteHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var sale = (Sale)args.Item;
+		await SaleService.DeleteSale(sale.SaleId);
+		await LoadData();
+	}
+}
+
+<style>
+	.width-100 {
+		width: 100%;
+	}
+
+	.grid .k-grid-content tr {
+		line-height: 32px;
+	}
+</style>

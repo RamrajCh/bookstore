@@ -15,11 +15,18 @@
 </div>
 
 @code {
-    public TelerikDrawer<DrawerItem>? Drawer { get; set; }
+    public TelerikDrawer<DrawerItem> Drawer { get; set; } = new TelerikDrawer<DrawerItem>();
     public DrawerItem? SelectedItem { get; set; }
     public IEnumerable<DrawerItem> Data { get; set; } =
         new List<DrawerItem>
             {
+            new DrawerItem
+            {
+                Text = "Home",
+                Icon = FontIcon.Home,
+                Url = "/"
+            },
+            new DrawerItem { Separator = true},
             new DrawerItem
             {
                 Text = "Genres",
@@ -39,16 +46,18 @@
                 Icon = FontIcon.User,
                 Url="/customers"
             },
-            new DrawerItem
-            {
-                Text = "Sales",
-                Icon = FontIcon.Dollar
-            },
             new DrawerItem { Separator = true},
             new DrawerItem
             {
-                Text = "Favourites",
-                Icon = FontIcon.StarOutline
+                Text = "Sales",
+                Icon = FontIcon.Dollar,
+                Url="/sales"
+            },
+            new DrawerItem
+            {
+                Text = "Sales Items",
+                Icon = FontIcon.Categorize,
+                Url="/salesitems"
             }
                 };
 

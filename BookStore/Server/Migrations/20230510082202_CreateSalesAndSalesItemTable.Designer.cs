@@ -4,6 +4,7 @@ using BookStore.Server.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStore.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230510082202_CreateSalesAndSalesItemTable")]
+    partial class CreateSalesAndSalesItemTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -178,7 +181,7 @@ namespace BookStore.Server.Migrations
                         .IsRequired();
 
                     b.HasOne("BookStore.Shared.Sale", "Sale")
-                        .WithMany()
+                        .WithMany("SalesItems")
                         .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -186,6 +189,11 @@ namespace BookStore.Server.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Sale");
+                });
+
+            modelBuilder.Entity("BookStore.Shared.Sale", b =>
+                {
+                    b.Navigation("SalesItems");
                 });
 #pragma warning restore 612, 618
         }
