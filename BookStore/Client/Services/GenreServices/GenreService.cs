@@ -30,11 +30,6 @@ namespace BookStore.Client.Services.GenreServices
                 Genres = result;
         }
 
-        public Task<Genre> GetSingleGenre(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task UpdateGenre(Genre genre, int id)
         {
             await _http.PutAsJsonAsync($"api/genres/{id}", genre);
