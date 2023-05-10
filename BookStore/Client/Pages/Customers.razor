@@ -1,0 +1,83 @@
+﻿@page "/customers"
+
+@using Telerik.DataSource
+
+@inject ICustomerService CustomerService
+
+<PageTitle>Customers</PageTitle>
+
+<h1>Customers</h1>
+
+<Loader isLoaded="@isLoaded" />
+
+<TelerikGrid Data="@GridData"
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="@GridFilterMode.FilterRow"
+			 EditMode="@GridEditMode.Popup"
+			 OnCreate="@CreateHandler"
+			 OnUpdate="@UpdateHandler"
+			 OnDelete="@DeleteHandler"
+			 ConfirmDelete="true">
+
+	<GridToolBarTemplate>
+		<GridCommandButton Command="Add" Icon="@FontIcon.Plus" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Add Customer</GridCommandButton>
+	</GridToolBarTemplate>
+	<GridSettings>
+		<GridPopupEditFormSettings Orientation="FormOrientation.Horizontal"></GridPopupEditFormSettings>
+	</GridSettings>
+
+	<GridColumns>
+		<GridColumn Field="Name" Title="Customer" />
+		<GridColumn Field="PhoneNumber" Title="Phone Number" />
+
+		<GridCommandColumn Width="260px">
+			<GridCommandButton Command="Edit" Icon="@FontIcon.Pencil" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary">Edit</GridCommandButton>
+			<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
+		</GridCommandColumn>
+	</GridColumns>
+
+</TelerikGrid>
+
+@code {
+	private bool isLoaded = false;
+
+	public List<Customer> GridData { get; set; } = new List<Customer>();
+
+	private async Task LoadData()
+	{
+		await CustomerService.GetCustomers();
+		GridData = CustomerService.Customers;
+		isLoaded = true;
+	}
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	public async Task CreateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var customer = (Customer)args.Item;
+		await CustomerService.CreateCustomer(customer);
+		await LoadData();
+	}
+
+	public async Task UpdateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var customer = (Customer)args.Item;
+		await CustomerService.UpdateCustomer(customer, customer.CustomerId);
+		await LoadData();
+	}
+
+	public async Task DeleteHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var customer = (Customer)args.Item;
+		await CustomerService.DeleteCustomer(customer.CustomerId);
+		await LoadData();
+	}
+}

@@ -30,20 +30,21 @@
             {
                 Text = "Books",
                 Icon = FontIcon.Book,
-                Url="/"
+                Url="/books"
             },
             new DrawerItem { Separator = true},
+            new DrawerItem
+            {
+                Text = "Customers",
+                Icon = FontIcon.User,
+                Url="/customers"
+            },
             new DrawerItem
             {
                 Text = "Sales",
                 Icon = FontIcon.Dollar
             },
             new DrawerItem { Separator = true},
-            new DrawerItem
-            {
-                Text = "Attachments",
-                Icon = FontIcon.EnvelopLink
-            },
             new DrawerItem
             {
                 Text = "Favourites",
@@ -53,7 +54,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        SelectedItem = Data.First();
+        SelectedItem = Data.ToList()[1];
 
         return base.OnInitializedAsync();
     }
