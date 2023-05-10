@@ -23,13 +23,15 @@
             new DrawerItem
             {
                 Text = "Books",
-                Icon = FontIcon.Book
+                Icon = FontIcon.Book,
+                Url="/"
             },
             new DrawerItem { Separator = true},
             new DrawerItem
             {
-                Text = "Notifications",
-                Icon = FontIcon.Bell
+                Text = "Genres",
+                Icon = FontIcon.Categorize,
+                Url = "/genres"
             },
             new DrawerItem
             {
@@ -91,7 +93,7 @@
     }
 
     .page{
-        padding: 20px;
+        padding: 10px;
     }
 </style>
 

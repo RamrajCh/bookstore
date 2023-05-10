@@ -1,0 +1,24 @@
+﻿<TelerikLoaderContainer OverlayThemeColor="light"
+						Visible="@( !isLoaded )"
+						Text="@null" Class="initial-data-loader">
+	<Template>
+		<TelerikLoader Type="@LoaderType.InfiniteSpinner"
+					   Size="@(ThemeConstants.Loader.Size.Large)">
+		</TelerikLoader>
+	</Template>
+</TelerikLoaderContainer>
+
+@code {
+	[Parameter]
+	public bool isLoaded { get; set; }
+}
+
+<style>
+	.initial-data-loader .k-loader-container-overlay.k-overlay-light {
+		background-color: white;
+	}
+
+	.k-loader-container {
+		z-index: 100;
+	}
+</style>

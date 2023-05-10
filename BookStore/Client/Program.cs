@@ -1,3 +1,5 @@
+global using BookStore.Client.Services.GenreServices;
+global using BookStore.Shared;
 using BookStore.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -7,6 +9,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped<IGenreService, GenreService>();
 
 // Register the telerik services
 builder.Services.AddTelerikBlazor();

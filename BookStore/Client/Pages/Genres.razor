@@ -1,0 +1,83 @@
+﻿@page "/genres"
+
+@using Telerik.DataSource
+
+@inject IGenreService GenreService
+
+<PageTitle>Genres</PageTitle>
+
+<h1>Genres</h1>
+
+<Loader isLoaded="@isLoaded"/>
+
+<TelerikGrid Data="@GridData"
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="@GridFilterMode.FilterRow"
+			 EditMode="@GridEditMode.Popup"
+			 OnCreate="@CreateHandler"
+			 OnUpdate="@UpdateHandler"
+			 OnDelete="@DeleteHandler"
+			 ConfirmDelete="true"
+>
+
+	<GridToolBarTemplate>
+		<GridCommandButton Command="Add" Icon="@FontIcon.Plus" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Add Genre</GridCommandButton>
+	</GridToolBarTemplate>
+	<GridSettings>
+		<GridPopupEditFormSettings Orientation="FormOrientation.Horizontal"></GridPopupEditFormSettings>
+	</GridSettings>
+	
+	<GridColumns>
+		<GridColumn Field="Name" Title="Genre Name" />
+
+		<GridCommandColumn Width="260px">
+			<GridCommandButton Command="Edit" Icon="@FontIcon.Pencil" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary">Edit</GridCommandButton>
+				<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
+		</GridCommandColumn>
+	</GridColumns>
+
+</TelerikGrid>
+
+@code {
+	private bool isLoaded = false;
+
+	public List<Genre> GridData { get; set; }
+
+	private async Task LoadData()
+	{
+		await GenreService.GetGenres();
+		GridData = GenreService.Genres;
+		isLoaded = true;
+	}
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadData();
+	}
+
+	public async Task CreateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var genre = (Genre)args.Item;
+		await GenreService.CreateGenre(genre);
+		await LoadData();
+	}
+
+	public async Task UpdateHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var genre = (Genre)args.Item;
+		await GenreService.UpdateGenre(genre, genre.GenreId);
+		await LoadData();
+	}
+
+	public async Task DeleteHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var genre = (Genre)args.Item;
+		await GenreService.DeleteGenre(genre.GenreId);
+		await LoadData();
+	}
+}
