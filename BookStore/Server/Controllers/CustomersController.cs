@@ -121,6 +121,27 @@ namespace BookStore.Server.Controllers
             return NoContent();
         }
 
+        // Post phone number of customer, returns customer if present
+        // POST: api/Customers/pno
+        [HttpPost("pno")]
+        public async Task<ActionResult<Customer>> PostCustomerPhoneNumber(Customer postCustomer)
+        {
+
+            if (_context.Customers == null)
+            {
+                return Problem("Entity set 'DataContext.Customers'  is null.");
+            }
+
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.PhoneNumber == postCustomer.PhoneNumber);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return customer;
+        }
+
         private bool CustomerExists(int id)
         {
             return (_context.Customers?.Any(e => e.CustomerId == id)).GetValueOrDefault();

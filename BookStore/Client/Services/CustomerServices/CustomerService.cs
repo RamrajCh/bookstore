@@ -13,10 +13,16 @@ namespace BookStore.Client.Services.CustomerServices
 			_http = http;
 		}
 
-        public async Task CreateCustomer(Customer customer)
+        public async Task<Customer> CreateCustomer(Customer customer)
 		{
-			await _http.PostAsJsonAsync("api/customers", customer);
-		}
+			var result = await _http.PostAsJsonAsync("api/customers", customer);
+            if (result.IsSuccessStatusCode)
+            {
+                var response = await result.Content.ReadFromJsonAsync<Customer>();
+                return response!;
+            }
+			throw new Exception("Error in creating customer!");
+        }
 
 		public async Task DeleteCustomer(int id)
 		{
@@ -34,5 +40,27 @@ namespace BookStore.Client.Services.CustomerServices
 		{
 			await _http.PutAsJsonAsync($"api/customers/{id}", customer);
 		}
-	}
+
+        public async Task<Customer> GetCustomerFromPhoneNumber(Customer customer)
+        {
+			var result = await _http.PostAsJsonAsync("api/customers/pno", customer);
+			if (result.IsSuccessStatusCode)
+			{
+				var response = await result.Content.ReadFromJsonAsync<Customer>();
+                return response!;
+            }
+			return customer;
+        }
+
+        public async Task<Customer> GetASingleCustomer(int id)
+        {
+            var result = await _http.GetFromJsonAsync<Customer>($"api/customers/{id}");
+            if (result != null)
+            {
+                return result;
+            }
+            throw new Exception("Hero not found!!");
+
+        }
+    }
 }

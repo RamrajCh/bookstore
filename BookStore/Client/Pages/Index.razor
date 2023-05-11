@@ -1,7 +1,63 @@
 ﻿@page "/"
 
+@using System.ComponentModel.DataAnnotations
+
+@inject ICustomerService CustomerService
+@inject IFormService FormService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Index - BookStore</PageTitle>
+
 <h1>Book Store</h1>
 
+<Loader isLoaded="@isLoaded" />
+
+
+<TelerikForm 
+    OnValidSubmit="@ValidSubmitHandler"
+    EditContext="@CustomerEditContext"
+>
+    <FormValidation>
+        <DataAnnotationsValidator />
+    </FormValidation>
+
+    <FormItems>
+        <FormItem Field="PhoneNumber"
+                  EditorType="@FormEditorType.TextBox"
+                  LabelText="Phone Number of Customer">
+        </FormItem>
+    </FormItems>
+</TelerikForm>
+
 @code {
+    private bool isLoaded = false;
+
+    private EditContext? CustomerEditContext { get; set; }
+
+    private Customer CustomerModel = new Customer();
+
+    protected override void OnInitialized()
+    {
+        CustomerEditContext = new EditContext(CustomerModel);
+        isLoaded = true;
+    }
+
+    public async void ValidSubmitHandler(EditContext editContext)
+    {
+        isLoaded = false;
+        var customer = (Customer)editContext.Model;
+        var result = await CustomerService.GetCustomerFromPhoneNumber(customer);
+        if (result.CustomerId == 0)
+        {
+            FormService.Customer = result;
+            isLoaded = true;
+            NavigationManager.NavigateTo("/transactions");
+        }
+        else
+        {
+            isLoaded = true;
+            NavigationManager.NavigateTo($"/transactions/{result.CustomerId}");
+        }
+    }
 
 }

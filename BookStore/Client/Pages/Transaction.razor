@@ -1,0 +1,307 @@
+﻿@page "/transactions"
+@page "/transactions/{id:int}"
+@using System.Globalization;
+
+@inject IFormService FormService
+@inject ICustomerService CustomerService
+@inject IBookService BookService
+@inject ISalesItemService SalesItemService
+@inject NavigationManager NavigationManager
+
+
+
+<h1>Transactions</h1>
+<Loader isLoaded="@isLoaded" />
+<hr />
+@if (Id == null)
+{
+    <PageTitle>Create New Customer - BookStore</PageTitle>
+    <h2>Create New Customer</h2>
+    <TelerikForm OnValidSubmit="@ValidSubmitHandler"
+             EditContext="@CustomerEditContext">
+        <FormValidation>
+            <DataAnnotationsValidator />
+        </FormValidation>
+
+        <FormItems>
+            <FormItem Field="Name"
+                  EditorType="@FormEditorType.TextBox"
+                  LabelText="Name of Customer">
+            </FormItem>
+        </FormItems>
+    </TelerikForm>
+}
+else
+{
+    <PageTitle>Transactions - BookStore</PageTitle>
+    <p>Customer Name: @customer.Name</p>
+    <p>Customer Phone Number : @customer.PhoneNumber</p>
+
+    <div class="k-d-flex k-flex-wrap">
+        <div class="k-flex-grow">
+            <h3 class="mb-sm">Books</h3>
+            <TelerikGrid @ref="@BookGrid"
+                Class="grid"
+			 Data=@BookList
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="GridFilterMode.FilterMenu"
+			 Resizable="true"
+			 Reorderable="true"
+			 PageSize="10"
+			 Navigable="true"
+             >
+                <GridColumns>
+		            <GridColumn Field="Title" Title="Book Title" Width="180px" />
+		            <GridColumn Field="Author" Title="Author" Width="180px" />
+		            <GridColumn Field="ISBN" Title="ISBN number" Width="180px" />
+		            <GridColumn Field="Genre.Name" Title="Genre" Width="140px" >
+                    </GridColumn>
+                    <GridColumn Field="PublishedYear" Title="Published Date" DisplayFormat="{0:yyyy-MM-dd}" Width="140px" />
+                    <GridColumn Field="Price" Title="Price" TextAlign="@ColumnTextAlign.Right" Width="110px">
+                        <Template>
+                            @{
+                                var book = context as Book;
+                                @book!.Price.ToString("C2", new CultureInfo("en-NP"))
+                                ;
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Stock" Title="Stock" Width="150px">
+                        <Template>
+                            @{
+                                var product = context as Book;
+                                var value = product!.Stock;
+                            }
+                            <TelerikProgressBar Class="width-80" Max="10" Value="(double)value">
+                                <ProgressBarLabel Visible="true" Position="@ProgressBarLabelPosition.Center">
+                                    <Template Context="progressBarContext">
+                                        @if (value == 0)
+                                        {
+                                            <span style="font-weight:bold">Out of Stock</span>
+                                        }
+                                        else
+                                        {
+                                            <span>In stock:<span style="font-weight:bold">@(progressBarContext.Value)</span></span>
+                                        }
+                                    </Template>
+                                </ProgressBarLabel>
+                            </TelerikProgressBar>
+                        </Template>
+                    </GridColumn>
+                    <GridCommandColumn>
+                        @{
+                            var book = context as Book;
+                            if(book!.Stock != 0)
+                            {
+                                <GridCommandButton Command="AddNewBook" Icon="@FontIcon.PlusCircle" OnClick="@AddNewBookCommandHandler">
+                                    Add
+                                </GridCommandButton>
+                            }
+                        }
+                    </GridCommandColumn>
+                </GridColumns>
+         </TelerikGrid>
+        </div>
+        <div class="k-flex-grow">
+            <h3 class="mb-sm">Sales Items</h3>
+			<TelerikGrid @ref="@SalesItemGrid"
+                Class="grid"
+					 Data=@GridData
+                     OnDelete="@DeleteHandler"
+					 ConfirmDelete="true"
+					 Pageable="true"
+					 Sortable="true"
+					 FilterMode="GridFilterMode.FilterMenu"
+					 Resizable="true"
+					 Reorderable="true"
+					 EditMode="GridEditMode.Inline"
+					 PageSize="10"
+					 Navigable="true">
+
+				<GridSettings>
+					<GridPopupEditFormSettings Orientation="FormOrientation.Horizontal"></GridPopupEditFormSettings>
+				</GridSettings>
+
+				<GridColumns>
+
+					<GridColumn Field="BookId" Title="Book Name" Width="180px" Editable="false">
+						<Template>
+							@{
+								var salesItem = context as SalesItem;
+								var bookTitle = BookList.FirstOrDefault(g => g.BookId == salesItem!.BookId)?.Title;
+								@bookTitle
+								;
+							}
+						</Template>
+						<GroupHeaderTemplate>
+							@{
+								if (context.Value != null)
+								{
+									<span>Book: @BookList.FirstOrDefault(c => c.BookId == (int)context.Value)?.Title</span>
+								}
+								else
+								{
+									<span>No Books</span>
+								}
+							}
+						</GroupHeaderTemplate>
+					</GridColumn>
+					<GridColumn Field="Quantity" Title="Quantity" Width="140px" />
+					<GridColumn Field="UnitPrice" Title="Price per unit" TextAlign="@ColumnTextAlign.Right" Width="110px" Editable="false">
+						<Template>
+							@{
+								var salesItems = context as SalesItem;
+								@salesItems!.UnitPrice.ToString("C2", new CultureInfo("en-NP"))
+								;
+							}
+						</Template>
+					</GridColumn>
+					<GridColumn Title="Total Price" TextAlign="@ColumnTextAlign.Right" Width="110px" Editable="false">
+						<Template>
+							@{
+								var salesItems = context as SalesItem;
+								var totalPrice = salesItems!.UnitPrice * salesItems.Quantity;
+								@totalPrice.ToString("C2", new CultureInfo("en-NP"))
+								;
+							}
+						</Template>
+
+					</GridColumn>
+
+					<GridCommandColumn Width="180px">
+						<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
+					</GridCommandColumn>
+				</GridColumns>
+
+			</TelerikGrid>
+        </div>
+    </div>
+
+    <TelerikButton ButtonType="ButtonType.Button" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="SubmitSalesItems">
+        Submit
+    </TelerikButton>
+}
+
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private bool isLoaded = false;
+
+    private EditContext? CustomerEditContext { get; set; }
+
+    public Customer customer = new Customer();
+
+    public TelerikGrid<SalesItem>? SalesItemGrid { get; set; }
+    public TelerikGrid<Book>? BookGrid { get; set; }
+
+    public List<SalesItem> GridData { get; set; } = new List<SalesItem>();
+    public List<Book> BookList { get; set; } = new List<Book>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (Id == null)
+        {
+            customer = FormService.Customer;
+            CustomerEditContext = new EditContext(customer);  
+        }
+        else
+        {
+            customer = await CustomerService.GetASingleCustomer((int)Id);
+            await LoadData();
+        }
+        isLoaded = true;
+    }
+
+    private async Task LoadData()
+    {
+        await BookService.GetBooks();
+        BookList = BookService.Books;
+    }
+
+    public async void ValidSubmitHandler(EditContext editContext)
+    {
+        isLoaded = false;
+        var customer = (Customer)editContext.Model;
+        var result = await CustomerService.CreateCustomer(customer);
+        isLoaded = true;
+        NavigationManager.NavigateTo($"/transactions/{result.CustomerId}", forceLoad:true);
+    }
+
+    private void InsertToSalesItem(Book book)
+    {
+        var saleItem = new SalesItem()
+            {
+                BookId = book.BookId,
+                Quantity = 1,
+                UnitPrice = book.Price
+            };
+
+        var salesItems = (List<SalesItem>)SalesItemGrid.Data;
+        var flag = -1;
+        foreach(var si in salesItems)
+        {
+            if (saleItem.BookId == si.BookId)
+            {
+                si.Quantity += 1;
+                flag = 1;
+                break;
+            }
+        }
+        if (flag == -1)
+        {
+            salesItems?.Add(saleItem);
+        }
+        SalesItemGrid?.Rebind();
+    }
+
+    public void AddNewBookCommandHandler(GridCommandEventArgs args)
+    {
+        isLoaded = false;
+        var book = (Book)args.Item;
+        InsertToSalesItem(book);
+        book.Stock -= 1;
+        BookGrid?.Rebind();
+        isLoaded = true;
+    }
+
+    private void AddToBookTable(SalesItem salesItem)
+    {
+        var books = (List<Book>)BookGrid.Data;
+        foreach (var book in books)
+        {
+            if (book.BookId == salesItem.BookId)
+            {
+                book.Stock += salesItem.Quantity;
+                break;
+            }
+        }
+        BookGrid?.Rebind();
+    }
+
+    public void DeleteHandler(GridCommandEventArgs args)
+    {
+        isLoaded = false;
+        var salesItem = (SalesItem)args.Item;
+        var salesItems = (List<SalesItem>)SalesItemGrid.Data;
+        AddToBookTable(salesItem);
+        salesItems.Remove(salesItem);
+        SalesItemGrid?.Rebind();
+        isLoaded = true;
+    }
+
+    public async Task SubmitSalesItems()
+    {
+        isLoaded = false;
+        var salesItems = (List<SalesItem>)SalesItemGrid.Data;
+        if(salesItems != null)
+        {
+            await SalesItemService.CreateSalesItems((int)Id!, salesItems);
+            isLoaded = true;
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

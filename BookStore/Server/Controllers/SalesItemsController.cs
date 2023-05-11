@@ -102,6 +102,23 @@ namespace BookStore.Server.Controllers
             return CreatedAtAction("GetSalesItem", new { id = salesItem.SalesItemId }, salesItem);
         }
 
+        [HttpPost("bundle")]
+        public async Task<ActionResult<SalesItem>> PostSalesItemsBundle(List<SalesItem> salesItem)
+        {
+            if (_context.SalesItems == null)
+            {
+                return Problem("Entity set 'DataContext.SalesItems'  is null.");
+            }
+            foreach (var saleItem in salesItem)
+            {
+                _context.SalesItems.Add(saleItem);
+                await _context.SaveChangesAsync();
+
+            }
+
+            return CreatedAtAction("GetSalesItem", salesItem);
+        }
+
         // DELETE: api/SalesItems/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSalesItem(int id)

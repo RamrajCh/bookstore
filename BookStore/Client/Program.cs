@@ -3,6 +3,7 @@ global using BookStore.Shared;
 global using BookStore.Client.Services.BookServices;
 global using BookStore.Client.Services.CustomerServices;
 global using BookStore.Client.Services.SaleServices;
+global using BookStore.Client.Services.FormServices;
 using BookStore.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -17,6 +18,7 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<ISalesItemService, SaleItemService>();
+builder.Services.AddSingleton<IFormService, FormService>();
 
 // Register the telerik services
 builder.Services.AddTelerikBlazor();
