@@ -35,7 +35,7 @@ namespace BookStore.Client.Services.SaleServices
 			await _http.PutAsJsonAsync($"api/salesitems/{id}", salesItem);
 		}
 
-        public async Task CreateSalesItems(int customerId, List<SalesItem> salesItems)
+        public async Task<Sale> CreateSalesItems(int customerId, List<SalesItem> salesItems)
         {
             // post to sales table (create new sale)
 			var sale = new Sale() { 
@@ -57,8 +57,9 @@ namespace BookStore.Client.Services.SaleServices
 					book!.Stock -= saleItem.Quantity;
 					await _http.PutAsJsonAsync($"api/books/{book.BookId}", book);
 				}
+				return response!;
             }
-
+			throw new Exception("Error in creating sale!!");
         }
     }
 }

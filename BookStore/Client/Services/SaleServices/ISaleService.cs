@@ -7,5 +7,6 @@
         Task CreateSale(Sale sale);
         Task UpdateSale(Sale sale, int id);
         Task DeleteSale(int id);
+        Task<List<SalesItem>> GetSalesDetails(int id);
     }
 }

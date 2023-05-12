@@ -4,6 +4,7 @@
 
 @inject ISaleService SaleService
 @inject ICustomerService CustomerService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Sales</PageTitle>
 
@@ -57,7 +58,8 @@
 		</GridColumn>
 		<GridColumn Field="SaleDate" Title="Sale Date" DisplayFormat="{0:yyyy-MM-dd}" Width="140px" />
 
-		<GridCommandColumn Width="180px">
+		<GridCommandColumn Width="200px">
+			<GridCommandButton Command="ViewDetail" Icon="@FontIcon.ArrowRight" ShowInEdit="false" OnClick="@ViewDetailHandler">View</GridCommandButton>
 			<GridCommandButton Command="Edit" Icon="@FontIcon.Pencil" ThemeColor="@ThemeConstants.Button.ThemeColor.Secondary">Edit</GridCommandButton>
 			<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
 		</GridCommandColumn>
@@ -109,6 +111,13 @@
 		var sale = (Sale)args.Item;
 		await SaleService.DeleteSale(sale.SaleId);
 		await LoadData();
+	}
+
+	public void ViewDetailHandler(GridCommandEventArgs args)
+	{
+		isLoaded = false;
+		var sale = (Sale)args.Item;
+		NavigationManager.NavigateTo($"/saledetails/{sale.SaleId}");
 	}
 }
 

@@ -34,5 +34,15 @@ namespace BookStore.Client.Services.SaleServices
         {
             await _http.PutAsJsonAsync($"api/sales/{id}", sale);
         }
+
+        public async Task<List<SalesItem>> GetSalesDetails(int id)
+        {
+            var result = await _http.GetFromJsonAsync<List<SalesItem>>($"api/sales/detail/{id}");
+            if (result != null)
+            {
+                return result;
+            }
+            throw new Exception("Sale Not Found!!");
+        }
     }
 }

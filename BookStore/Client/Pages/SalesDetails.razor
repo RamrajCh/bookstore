@@ -1,0 +1,93 @@
+﻿@page "/saledetails/{id:int}"
+
+@using System.Globalization;
+
+@inject ISaleService SaleService
+@inject NavigationManager NavigationManager
+
+<h1>Sale Details</h1>
+<Loader isLoaded="@isLoaded" />
+<p>Customer Name: @customer.Name</p>
+<p>Customer Phone Number: @customer.PhoneNumber</p>
+<p>Sale Id: @sale.SaleId</p>
+<p>Sale Date: @sale.SaleDate.ToLongDateString()</p>
+<hr />
+<h3>Sale Items</h3>
+<TelerikGrid Class="grid"
+			 Data=@GridData
+			 Pageable="true"
+			 Sortable="true"
+			 FilterMode="GridFilterMode.FilterMenu"
+			 Resizable="true"
+			 Reorderable="true"
+			 PageSize="10"
+			 Navigable="true">
+			<GridColumns>
+
+				<GridColumn Field="Book.Title" Title="Book Name" Width="180px"/>
+		<GridColumn Field="Quantity" Title="Quantity" TextAlign="@ColumnTextAlign.Right" Width="140px" />
+				<GridColumn Field="UnitPrice" Title="Price per unit" TextAlign="@ColumnTextAlign.Right" Width="110px">
+					<Template>
+						@{
+							var salesItems = context as SalesItem;
+							@salesItems!.UnitPrice.ToString("C2", new CultureInfo("en-NP"));
+						}
+					</Template>
+				</GridColumn>
+				<GridColumn Title="Total Price" TextAlign="@ColumnTextAlign.Right" Width="110px" Editable="false">
+					<Template>
+						@{
+							var salesItems = context as SalesItem;
+							var totalPrice = salesItems!.UnitPrice * salesItems.Quantity;
+							@totalPrice.ToString("C2", new CultureInfo("en-NP"));
+						}
+					</Template>
+					<FooterTemplate>
+						Grand Total : @grandTotalPrice.ToString("C2", new CultureInfo("en-NP"))
+					</FooterTemplate>
+				</GridColumn>
+			</GridColumns>
+</TelerikGrid>
+
+<TelerikButton ButtonType="ButtonType.Button" Icon="@FontIcon.Home" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="NavigateToHome">
+	Go to Home
+</TelerikButton>
+
+@code{
+	[Parameter]
+	public int Id { get; set; }
+
+	private bool isLoaded = false;
+
+	public decimal grandTotalPrice { get; set; }
+
+	public Customer customer { get; set; } = new Customer();
+	public Sale sale { get; set; } = new Sale(); 
+
+	public List<SalesItem> GridData { get; set; } = new List<SalesItem>(); 
+
+	protected async override Task OnInitializedAsync()
+	{
+		var result = await SaleService.GetSalesDetails(Id);
+		GridData = result;
+		sale = result[0].Sale!;
+		customer = result[0].Sale!.Customer!;
+		grandTotalPrice = GetTotalPrice(result);
+		isLoaded = true;
+	}
+
+	public decimal GetTotalPrice(List<SalesItem> salesItems)
+	{
+		decimal totalPrice = 0;
+		foreach (var saleItem in salesItems)
+		{
+			totalPrice += (saleItem.Quantity * saleItem.UnitPrice);
+		}
+		return totalPrice;
+	}
+
+	public void NavigateToHome()
+	{
+		NavigationManager.NavigateTo("/");
+	}
+}

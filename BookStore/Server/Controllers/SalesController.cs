@@ -118,6 +118,31 @@ namespace BookStore.Server.Controllers
             return NoContent();
         }
 
+        // api/sales/details/5
+        [HttpGet("detail/{id}")]
+        public async Task<ActionResult<IEnumerable<SalesItem>>> GetSalesDetails(int id)
+        {
+            if (_context.Sales == null)
+            {
+                return NotFound();
+            }
+
+            var salesItem = await _context.SalesItems
+                .Include(si => si.Sale)
+                .Include(si => si.Sale!.Customer)
+                .Include(si => si.Book)
+                .Where(s => s.SaleId == id)
+                .ToListAsync();
+
+            if (salesItem == null)
+            {
+                return NotFound();
+            }
+
+            return salesItem;
+        }
+
+
         private bool SaleExists(int id)
         {
             return (_context.Sales?.Any(e => e.SaleId == id)).GetValueOrDefault();

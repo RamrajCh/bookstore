@@ -156,6 +156,7 @@ else
 								;
 							}
 						</Template>
+                        
 					</GridColumn>
 					<GridColumn Title="Total Price" TextAlign="@ColumnTextAlign.Right" Width="110px" Editable="false">
 						<Template>
@@ -166,19 +167,20 @@ else
 								;
 							}
 						</Template>
-
+                        <FooterTemplate>
+                            Grand Total : @grandTotalPrice.ToString("C2", new CultureInfo("en-NP"))
+                        </FooterTemplate>
 					</GridColumn>
 
 					<GridCommandColumn Width="180px">
 						<GridCommandButton Command="Delete" Icon="@FontIcon.Trash" ThemeColor="@ThemeConstants.Button.ThemeColor.Error">Delete</GridCommandButton>
 					</GridCommandColumn>
 				</GridColumns>
-
 			</TelerikGrid>
         </div>
     </div>
 
-    <TelerikButton ButtonType="ButtonType.Button" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="SubmitSalesItems">
+    <TelerikButton ButtonType="ButtonType.Button" Icon="@FontIcon.Check" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="SubmitSalesItems">
         Submit
     </TelerikButton>
 }
@@ -190,6 +192,8 @@ else
     public int? Id { get; set; }
 
     private bool isLoaded = false;
+
+    public decimal grandTotalPrice { get; set; } 
 
     private EditContext? CustomerEditContext { get; set; }
 
@@ -210,6 +214,7 @@ else
         }
         else
         {
+            grandTotalPrice = 0;
             customer = await CustomerService.GetASingleCustomer((int)Id);
             await LoadData();
         }
@@ -255,6 +260,7 @@ else
         {
             salesItems?.Add(saleItem);
         }
+        grandTotalPrice = GetTotalPrice(salesItems!);
         SalesItemGrid?.Rebind();
     }
 
@@ -289,6 +295,7 @@ else
         var salesItems = (List<SalesItem>)SalesItemGrid.Data;
         AddToBookTable(salesItem);
         salesItems.Remove(salesItem);
+        grandTotalPrice = GetTotalPrice(salesItems);
         SalesItemGrid?.Rebind();
         isLoaded = true;
     }
@@ -299,9 +306,19 @@ else
         var salesItems = (List<SalesItem>)SalesItemGrid.Data;
         if(salesItems != null)
         {
-            await SalesItemService.CreateSalesItems((int)Id!, salesItems);
+            var result = await SalesItemService.CreateSalesItems((int)Id!, salesItems);
             isLoaded = true;
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo($"/saledetails/{result.SaleId}");
         }
+    }
+
+    public decimal GetTotalPrice(List<SalesItem> salesItems)
+    {
+        decimal totalPrice = 0;
+        foreach (var saleItem in salesItems)
+        {
+            totalPrice += (saleItem.Quantity * saleItem.UnitPrice);
+        }
+        return totalPrice;
     }
 }
