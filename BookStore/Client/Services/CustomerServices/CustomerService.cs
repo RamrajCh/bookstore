@@ -26,7 +26,11 @@ namespace BookStore.Client.Services.CustomerServices
 
 		public async Task DeleteCustomer(int id)
 		{
-			await _http.DeleteAsync($"api/customers/{id}");
+			var result = await _http.DeleteAsync($"api/customers/{id}");
+			if (!result.IsSuccessStatusCode) 
+			{
+				throw new Exception("Error in deleting customer!");
+			}
 		}
 
 		public async Task GetCustomers()
@@ -38,7 +42,11 @@ namespace BookStore.Client.Services.CustomerServices
 
 		public async Task UpdateCustomer(Customer customer, int id)
 		{
-			await _http.PutAsJsonAsync($"api/customers/{id}", customer);
+			var result = await _http.PutAsJsonAsync($"api/customers/{id}", customer);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in updating customer!");
+			}
 		}
 
         public async Task<Customer> GetCustomerFromPhoneNumber(Customer customer)

@@ -12,12 +12,6 @@
 
 <Loader isLoaded="@isLoaded" />
 
-
-<TelerikNotification @ref="NotificationComponent"
-						Class="notification"
-						HorizontalPosition="@NotificationHorizontalPosition.Center"
-						VerticalPosition="@NotificationVerticalPosition.Top"></TelerikNotification>
-
 <TelerikGrid Class="grid"
 			 Data=@GridData
 			 OnUpdate="@UpdateHandler"
@@ -111,11 +105,12 @@
 	public List<Book> GridData { get; set; } = new List<Book>();
 	public List<Genre> GenreList { get; set; } = new List<Genre>();
 
-	TelerikNotification NotificationComponent { get; set; }
+	[CascadingParameter]
+	protected Notification? Notification { get; set; }
 
 	void ShowNotifications(string Text, string ThemeColor)
 	{
-		NotificationComponent.Show(new NotificationModel
+		Notification!.telerikNotification.Show(new NotificationModel
 			{
 				Text = Text,
 				ThemeColor = ThemeColor,
@@ -167,7 +162,6 @@
 		catch
 		{
 			ShowNotifications("Book not updated!!", "error");
-			isLoaded = true;
 		}
 	}
 
@@ -184,7 +178,6 @@
 		catch
 		{
 			ShowNotifications("Book not deleted!!", "error");
-			isLoaded = true;
 		}
 	}
 }

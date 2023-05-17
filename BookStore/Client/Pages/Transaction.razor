@@ -205,6 +205,19 @@ else
     public List<SalesItem> GridData { get; set; } = new List<SalesItem>();
     public List<Book> BookList { get; set; } = new List<Book>();
 
+    [CascadingParameter]
+    protected Notification? Notification { get; set; }
+
+    void ShowNotifications(string Text, string ThemeColor)
+    {
+        Notification!.telerikNotification.Show(new NotificationModel
+            {
+                Text = Text,
+                ThemeColor = ThemeColor,
+            });
+        isLoaded = true;
+    }
+
     protected async override Task OnInitializedAsync()
     {
         if (Id == null)
@@ -216,6 +229,7 @@ else
         {
             grandTotalPrice = 0;
             customer = await CustomerService.GetASingleCustomer((int)Id);
+            ShowNotifications("Add books for transactions!", "info");
             await LoadData();
         }
         isLoaded = true;
@@ -231,9 +245,17 @@ else
     {
         isLoaded = false;
         var customer = (Customer)editContext.Model;
-        var result = await CustomerService.CreateCustomer(customer);
-        isLoaded = true;
-        NavigationManager.NavigateTo($"/transactions/{result.CustomerId}", forceLoad:true);
+        try
+        {
+            var result = await CustomerService.CreateCustomer(customer);
+            ShowNotifications("New customer created successfully!!", "success");
+            await Task.Delay(3000);
+            NavigationManager.NavigateTo($"/transactions/{result.CustomerId}", forceLoad:true);
+        }
+        catch (Exception)
+        {
+            ShowNotifications("Error in creating new customer!", "error");
+        }
     }
 
     private void InsertToSalesItem(Book book)
@@ -245,7 +267,7 @@ else
                 UnitPrice = book.Price
             };
 
-        var salesItems = (List<SalesItem>)SalesItemGrid.Data;
+        var salesItems = (List<SalesItem>)SalesItemGrid!.Data;
         var flag = -1;
         foreach(var si in salesItems)
         {
@@ -276,7 +298,7 @@ else
 
     private void AddToBookTable(SalesItem salesItem)
     {
-        var books = (List<Book>)BookGrid.Data;
+        var books = (List<Book>)BookGrid!.Data;
         foreach (var book in books)
         {
             if (book.BookId == salesItem.BookId)
@@ -292,7 +314,7 @@ else
     {
         isLoaded = false;
         var salesItem = (SalesItem)args.Item;
-        var salesItems = (List<SalesItem>)SalesItemGrid.Data;
+        var salesItems = (List<SalesItem>)SalesItemGrid!.Data;
         AddToBookTable(salesItem);
         salesItems.Remove(salesItem);
         grandTotalPrice = GetTotalPrice(salesItems);
@@ -303,14 +325,14 @@ else
     public async Task SubmitSalesItems()
     {
         isLoaded = false;
-        var salesItems = (List<SalesItem>)SalesItemGrid.Data;
+        var salesItems = (List<SalesItem>)SalesItemGrid!.Data;
         if(salesItems.Count() > 0)
         {
             var result = await SalesItemService.CreateSalesItems((int)Id!, salesItems);
-            isLoaded = true;
+            ShowNotifications("Transaction completed.", "success");
             NavigationManager.NavigateTo($"/saledetails/{result.SaleId}");
         }
-        isLoaded = true;
+        ShowNotifications("Please, add books in the sale items.", "warning");
     }
 
     public decimal GetTotalPrice(List<SalesItem> salesItems)

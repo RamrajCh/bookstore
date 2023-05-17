@@ -15,13 +15,21 @@ namespace BookStore.Client.Services.SaleServices
 
         public async Task CreateSale(Sale sale)
         {
-            await _http.PostAsJsonAsync("api/sales", sale);
-        }
+           var result = await _http.PostAsJsonAsync("api/sales", sale);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in creating sale!");
+			}
+		}
 
         public async Task DeleteSale(int id)
         {
-            await _http.DeleteAsync($"api/sales/{id}");
-        }
+            var result = await _http.DeleteAsync($"api/sales/{id}");
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in deleting sale!");
+			}
+		}
 
         public async Task GetSales()
         {
@@ -30,10 +38,27 @@ namespace BookStore.Client.Services.SaleServices
                 Sales = result;
         }
 
+        public async Task<Sale> GetASale(int id)
+        {
+            var result = await _http.GetFromJsonAsync<Sale>($"api/sales/{id}");
+            if (result != null)
+            {
+                return result;
+            }
+            else
+            {
+                throw new Exception("Sale not found!!");
+            }
+        }
+
         public async Task UpdateSale(Sale sale, int id)
         {
-            await _http.PutAsJsonAsync($"api/sales/{id}", sale);
-        }
+            var result = await _http.PutAsJsonAsync($"api/sales/{id}", sale);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in updating sale!");
+			}
+		}
 
         public async Task<List<SalesItem>> GetSalesDetails(int id)
         {

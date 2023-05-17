@@ -44,13 +44,25 @@
 
 	public List<Genre> GridData { get; set; } = new List<Genre>();
 
+	[CascadingParameter]
+	protected Notification Notification { get; set; }
+
+	void ShowNotifications(string Text, string ThemeColor)
+	{
+		Notification.telerikNotification.Show(new NotificationModel
+			{
+				Text = Text,
+				ThemeColor = ThemeColor,
+			});
+		isLoaded = true;
+	}
+
 	private async Task LoadData()
 	{
 		await GenreService.GetGenres();
 		GridData = GenreService.Genres;
 		isLoaded = true;
 	}
-
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -61,23 +73,47 @@
 	{
 		isLoaded = false;
 		var genre = (Genre)args.Item;
-		await GenreService.CreateGenre(genre);
-		await LoadData();
+		try
+		{
+			await GenreService.CreateGenre(genre);
+			await LoadData();
+			ShowNotifications("Genre created successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Genre not created!!", "error");
+		}
 	}
 
 	public async Task UpdateHandler(GridCommandEventArgs args)
 	{
 		isLoaded = false;
 		var genre = (Genre)args.Item;
-		await GenreService.UpdateGenre(genre, genre.GenreId);
-		await LoadData();
+		try
+		{
+			await GenreService.UpdateGenre(genre, genre.GenreId);
+			await LoadData();
+			ShowNotifications("Genre updated successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Genre not updated!!", "error");
+		}
 	}
 
 	public async Task DeleteHandler(GridCommandEventArgs args)
 	{
 		isLoaded = false;
 		var genre = (Genre)args.Item;
-		await GenreService.DeleteGenre(genre.GenreId);
-		await LoadData();
+		try
+		{
+			await GenreService.DeleteGenre(genre.GenreId);
+			await LoadData();
+			ShowNotifications("Genre deleted successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Genre not deleted!!", "error");
+		}
 	}
 }

@@ -15,13 +15,21 @@ namespace BookStore.Client.Services.GenreServices
 
         public async Task CreateGenre(Genre genre)
 		{
-            await _http.PostAsJsonAsync("api/genres", genre);
-        }
+            var result = await _http.PostAsJsonAsync("api/genres", genre);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in creating genre!");
+			}
+		}
 
         public async Task DeleteGenre(int id)
         {
-            await _http.DeleteAsync($"api/genres/{id}");
-        }
+            var result = await _http.DeleteAsync($"api/genres/{id}");
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in deleting genre!");
+			}
+		}
 
         public async Task GetGenres()
         {
@@ -32,7 +40,11 @@ namespace BookStore.Client.Services.GenreServices
 
         public async Task UpdateGenre(Genre genre, int id)
         {
-            await _http.PutAsJsonAsync($"api/genres/{id}", genre);
+            var result = await _http.PutAsJsonAsync($"api/genres/{id}", genre);
+            if (!result.IsSuccessStatusCode)
+            {
+                throw new Exception("Error in updating genre");
+            }
         }
     }
 }

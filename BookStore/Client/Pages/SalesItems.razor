@@ -141,6 +141,19 @@
 	public List<Sale> SaleList { get; set; } = new List<Sale>();
 	public List<Book> BookList { get; set; } = new List<Book>();
 
+	[CascadingParameter]
+	protected Notification Notification { get; set; }
+
+	void ShowNotifications(string Text, string ThemeColor)
+	{
+		Notification.telerikNotification.Show(new NotificationModel
+			{
+				Text = Text,
+				ThemeColor = ThemeColor,
+			});
+		isLoaded = true;
+	}
+
 	private async Task LoadData()
 	{
 		await SalesItemService.GetSalesItems();
@@ -181,8 +194,16 @@
 	{
 		isLoaded = false;
 		var salesItem = (SalesItem)args.Item;
-		await SalesItemService.CreateSaleItem(salesItem);
-		await LoadData();
+		try
+		{
+			await SalesItemService.CreateSaleItem(salesItem);
+			await LoadData();
+			ShowNotifications("Sales Item created successfully!!", "success");
+		}
+		catch
+		{
+			ShowNotifications("Sales Item not created", "error");
+		}
 
 	}
 
@@ -190,16 +211,32 @@
 	{
 		isLoaded = false;
 		var salesItem = (SalesItem)args.Item;
-		await SalesItemService.UpdateSaleItem(salesItem, salesItem.SalesItemId);
-		await LoadData();
+		try
+		{
+			await SalesItemService.UpdateSaleItem(salesItem, salesItem.SalesItemId);
+			await LoadData();
+			ShowNotifications("Sales Item created successfully!!", "success");
+		}
+		catch
+		{
+			ShowNotifications("Sales Item not created", "error");
+		}
 	}
 
 	public async Task DeleteHandler(GridCommandEventArgs args)
 	{
 		isLoaded = false;
 		var salesItem = (SalesItem)args.Item;
-		await SalesItemService.DeleteSaleItem(salesItem.SalesItemId);
-		await LoadData();
+		try
+		{
+			await SalesItemService.DeleteSaleItem(salesItem.SalesItemId);
+			await LoadData();
+			ShowNotifications("Sales Item created successfully!!", "success");
+		}
+		catch
+		{
+			ShowNotifications("Sales Item not created", "error");
+		}
 	}
 }
 

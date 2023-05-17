@@ -74,6 +74,19 @@
 	public List<Sale> GridData { get; set; } = new List<Sale>();
 	public List<Customer> CustomerList { get; set; } = new List<Customer>();
 
+	[CascadingParameter]
+	protected Notification? Notification { get; set; }
+
+	void ShowNotifications(string Text, string ThemeColor)
+	{
+		Notification!.telerikNotification.Show(new NotificationModel
+			{
+				Text = Text,
+				ThemeColor = ThemeColor,
+			});
+		isLoaded = true;
+	}
+
 	private async Task LoadData()
 	{
 		await SaleService.GetSales();
@@ -92,8 +105,16 @@
 	{
 		isLoaded = false;
 		var sale = (Sale)args.Item;
-		await SaleService.CreateSale(sale);
-		await LoadData();
+		try
+		{
+			await SaleService.CreateSale(sale);
+			await LoadData();
+			ShowNotifications("Sale created successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Sale not created!!", "error");
+		}
 
 	}
 
@@ -101,16 +122,32 @@
 	{
 		isLoaded = false;
 		var sale = (Sale)args.Item;
-		await SaleService.UpdateSale(sale, sale.SaleId);
-		await LoadData();
+		try
+		{
+			await SaleService.UpdateSale(sale, sale.SaleId);
+			await LoadData();
+			ShowNotifications("Sale updated successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Sale not updated!!", "error");
+		}
 	}
 
 	public async Task DeleteHandler(GridCommandEventArgs args)
 	{
 		isLoaded = false;
 		var sale = (Sale)args.Item;
-		await SaleService.DeleteSale(sale.SaleId);
-		await LoadData();
+		try
+		{
+			await SaleService.DeleteSale(sale.SaleId);
+			await LoadData();
+			ShowNotifications("Sale deleted successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Sale not deleted!!", "error");
+		}
 	}
 
 	public void ViewDetailHandler(GridCommandEventArgs args)

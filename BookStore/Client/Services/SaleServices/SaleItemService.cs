@@ -16,12 +16,20 @@ namespace BookStore.Client.Services.SaleServices
 
         public async Task CreateSaleItem(SalesItem salesItem)
 		{
-			await _http.PostAsJsonAsync("api/salesitems", salesItem);
+			var result = await _http.PostAsJsonAsync("api/salesitems", salesItem);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in creating sale item!");
+			}
 		}
 
 		public async Task DeleteSaleItem(int id)
 		{
-			await _http.DeleteAsync($"api/salesitems/{id}");
+			var result = await _http.DeleteAsync($"api/salesitems/{id}");
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in deleting sale item!");
+			}
 		}
 
 		public async Task GetSalesItems()
@@ -32,7 +40,11 @@ namespace BookStore.Client.Services.SaleServices
 
 		public async Task UpdateSaleItem(SalesItem salesItem, int id)
 		{
-			await _http.PutAsJsonAsync($"api/salesitems/{id}", salesItem);
+			var result = await _http.PutAsJsonAsync($"api/salesitems/{id}", salesItem);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in updating sale item!");
+			}
 		}
 
         public async Task<Sale> CreateSalesItems(int customerId, List<SalesItem> salesItems)

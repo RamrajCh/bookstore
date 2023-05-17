@@ -36,6 +36,19 @@
 
     private Customer CustomerModel = new Customer();
 
+    [CascadingParameter]
+    protected Notification? Notification { get; set; }
+
+    void ShowNotifications(string Text, string ThemeColor)
+    {
+        Notification!.telerikNotification.Show(new NotificationModel
+            {
+                Text = Text,
+                ThemeColor = ThemeColor,
+            });
+        isLoaded = true;
+    }
+
     protected override void OnInitialized()
     {
         CustomerEditContext = new EditContext(CustomerModel);
@@ -50,12 +63,12 @@
         if (result.CustomerId == 0)
         {
             FormService.Customer = result;
-            isLoaded = true;
+            ShowNotifications("Customer not found. Create new customer!!", "info");
             NavigationManager.NavigateTo("/transactions");
         }
         else
         {
-            isLoaded = true;
+            ShowNotifications("Customer found", "info");
             NavigationManager.NavigateTo($"/transactions/{result.CustomerId}");
         }
     }

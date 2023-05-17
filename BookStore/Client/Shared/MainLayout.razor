@@ -7,14 +7,24 @@
     </div>
     <TelerikDrawer @ref="Drawer" Data="Data" Mode="@DrawerMode.Push" Expanded="true" @bind-SelectedItem="SelectedItem">
         <DrawerContent>
-            <div class="page">
-                @Body
-            </div>
+            <TelerikNotification @ref="@Notification.telerikNotification"
+                                 HorizontalPosition="@NotificationHorizontalPosition.Center"
+                                 VerticalPosition="@NotificationVerticalPosition.Top"
+                                 Class="big-notification">
+            </TelerikNotification>
+            <CascadingValue IsFixed="true" Value="@Notification">
+                <div class="page">
+                    @Body
+                </div>
+            </CascadingValue>
+            
         </DrawerContent>
     </TelerikDrawer>
 </div>
 
 @code {
+    Notification Notification { get; set; } = new Notification();
+
     public TelerikDrawer<DrawerItem> Drawer { get; set; } = new TelerikDrawer<DrawerItem>();
     public DrawerItem? SelectedItem { get; set; }
     public IEnumerable<DrawerItem> Data { get; set; } =
@@ -81,7 +91,6 @@
 }
 
 <style>
-    
 
     .k-drawer-container {
         position: relative;
@@ -104,6 +113,15 @@
 
     .page{
         padding: 10px;
+    }
+
+    .big-notification .k-notification-container .k-notification-wrap {
+        width: 350px;
+        height: 100px;
+    }
+
+    .big-notification {
+        z-index: 1234;
     }
 </style>
 

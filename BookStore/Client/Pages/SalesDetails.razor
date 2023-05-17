@@ -68,12 +68,21 @@
 
 	protected async override Task OnInitializedAsync()
 	{
-		var result = await SaleService.GetSalesDetails(Id);
-		GridData = result;
-		sale = result[0].Sale!;
-		customer = result[0].Sale!.Customer!;
-		grandTotalPrice = GetTotalPrice(result);
-		isLoaded = true;
+		try
+		{
+			var result = await SaleService.GetSalesDetails(Id);
+			GridData = result;
+			sale = result[0].Sale!;
+			customer = result[0].Sale!.Customer!;
+			grandTotalPrice = GetTotalPrice(result);
+			isLoaded = true;
+		}
+		catch (Exception)
+		{
+			sale = await SaleService.GetASale(Id);
+			customer = sale.Customer!;
+			isLoaded = true;
+		}
 	}
 
 	public decimal GetTotalPrice(List<SalesItem> salesItems)
