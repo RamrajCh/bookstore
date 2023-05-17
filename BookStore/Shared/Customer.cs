@@ -12,6 +12,7 @@ namespace BookStore.Shared
 		public int CustomerId { get; set; }
 		public string? Name { get; set; }
 		[Required]
+		[RegularExpression(@"^9(8|7)[0-9]{8}$", ErrorMessage ="Please provide valid phone number.")]
 		public string? PhoneNumber { get; set; }
 	}
 }

@@ -159,6 +159,14 @@
 
 	private void OnStateInit(GridStateEventArgs<SalesItem> args)
 	{
+		args.GridState.SortDescriptors = new List<SortDescriptor>()
+		{
+			new SortDescriptor()
+				{
+					Member = "SaleId",
+					SortDirection = ListSortDirection.Descending
+				}
+		};
 		args.GridState.GroupDescriptors = new List<GroupDescriptor>()
 		{
 			new GroupDescriptor()

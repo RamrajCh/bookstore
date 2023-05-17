@@ -73,7 +73,7 @@ else
                                 var product = context as Book;
                                 var value = product!.Stock;
                             }
-                            <TelerikProgressBar Class="width-80" Max="10" Value="(double)value">
+                            <TelerikProgressBar Class="width-80" Max="15" Value="(double)value">
                                 <ProgressBarLabel Visible="true" Position="@ProgressBarLabelPosition.Center">
                                     <Template Context="progressBarContext">
                                         @if (value == 0)
@@ -179,7 +179,7 @@ else
 			</TelerikGrid>
         </div>
     </div>
-
+    <br/>
     <TelerikButton ButtonType="ButtonType.Button" Icon="@FontIcon.Check" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="SubmitSalesItems">
         Submit
     </TelerikButton>
@@ -304,12 +304,13 @@ else
     {
         isLoaded = false;
         var salesItems = (List<SalesItem>)SalesItemGrid.Data;
-        if(salesItems != null)
+        if(salesItems.Count() > 0)
         {
             var result = await SalesItemService.CreateSalesItems((int)Id!, salesItems);
             isLoaded = true;
             NavigationManager.NavigateTo($"/saledetails/{result.SaleId}");
         }
+        isLoaded = true;
     }
 
     public decimal GetTotalPrice(List<SalesItem> salesItems)

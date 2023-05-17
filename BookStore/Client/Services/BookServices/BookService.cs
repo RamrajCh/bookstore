@@ -16,12 +16,20 @@ namespace BookStore.Client.Services.BookServices
 
 		public async Task CreateBook(Book book)
 		{
-			await _http.PostAsJsonAsync("api/books", book);
+			var result = await _http.PostAsJsonAsync("api/books", book);
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in creating new book!!");
+			}
 		}
 
 		public async Task DeleteBook(int id)
 		{
-			await _http.DeleteAsync($"api/books/{id}");
+			var result = await _http.DeleteAsync($"api/books/{id}");
+			if (!result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in deleting book!!");
+			}
 		}
 
 		public async Task GetBooks()
@@ -33,7 +41,11 @@ namespace BookStore.Client.Services.BookServices
 
 		public async Task UpdateBook(Book book, int id)
 		{
-			await _http.PutAsJsonAsync($"api/books/{id}", book);
+			var result = await _http.PutAsJsonAsync($"api/books/{id}", book);
+			if (! result.IsSuccessStatusCode)
+			{
+				throw new Exception("Error in updating book!!");
+			}
 		}
 	}
 }

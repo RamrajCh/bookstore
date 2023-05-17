@@ -22,7 +22,7 @@
             {
             new DrawerItem
             {
-                Text = "Home",
+                Text = "Index",
                 Icon = FontIcon.Home,
                 Url = "/"
             },
@@ -63,7 +63,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        SelectedItem = Data.ToList()[1];
+        SelectedItem = Data.ToList()[0];
 
         return base.OnInitializedAsync();
     }

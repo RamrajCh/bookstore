@@ -12,6 +12,12 @@
 
 <Loader isLoaded="@isLoaded" />
 
+
+<TelerikNotification @ref="NotificationComponent"
+						Class="notification"
+						HorizontalPosition="@NotificationHorizontalPosition.Center"
+						VerticalPosition="@NotificationVerticalPosition.Top"></TelerikNotification>
+
 <TelerikGrid Class="grid"
 			 Data=@GridData
 			 OnUpdate="@UpdateHandler"
@@ -73,7 +79,7 @@
                     var product = context as Book;
                     var value = product!.Stock;
                 }
-                <TelerikProgressBar Class="width-80" Max="10" Value="(double)value">
+                <TelerikProgressBar Class="width-80" Max="15" Value="(double)value">
                     <ProgressBarLabel Visible="true" Position="@ProgressBarLabelPosition.Center">
                         <Template Context="progressBarContext">
                             @if (value == 0)
@@ -105,6 +111,18 @@
 	public List<Book> GridData { get; set; } = new List<Book>();
 	public List<Genre> GenreList { get; set; } = new List<Genre>();
 
+	TelerikNotification NotificationComponent { get; set; }
+
+	void ShowNotifications(string Text, string ThemeColor)
+	{
+		NotificationComponent.Show(new NotificationModel
+			{
+				Text = Text,
+				ThemeColor = ThemeColor,
+			});
+		isLoaded = true;
+	}
+
 	private async Task LoadData()
 	{
 		await BookService.GetBooks();
@@ -123,8 +141,16 @@
 	{
 		isLoaded = false;
 		var book = (Book)args.Item;
-		await BookService.CreateBook(book);
-		await LoadData();
+		try
+		{
+			await BookService.CreateBook(book);
+			await LoadData();
+			ShowNotifications("Book created successfully!!", "success");
+		}
+		catch (Exception)
+		{
+			ShowNotifications("Book not created!!", "error");
+		}
 
 	}
 
@@ -132,16 +158,34 @@
 	{
 		isLoaded = false;
 		var book = (Book)args.Item;
-		await BookService.UpdateBook(book, book.BookId);
-		await LoadData();
+		try
+		{
+			await BookService.UpdateBook(book, book.BookId);
+			await LoadData();
+			ShowNotifications("Book updated successfully!!", "success");
+		}
+		catch
+		{
+			ShowNotifications("Book not updated!!", "error");
+			isLoaded = true;
+		}
 	}
 
 	public async Task DeleteHandler(GridCommandEventArgs args)
 	{
 		isLoaded = false;
 		var book = (Book)args.Item;
-		await BookService.DeleteBook(book.BookId);
-		await LoadData();
+		try
+		{
+			await BookService.DeleteBook(book.BookId);
+			await LoadData();
+			ShowNotifications("Book deleted successfully!!", "success");
+		}
+		catch
+		{
+			ShowNotifications("Book not deleted!!", "error");
+			isLoaded = true;
+		}
 	}
 }
 
@@ -152,5 +196,22 @@
 
 	.grid .k-grid-content tr {
 		line-height: 32px;
+	}
+
+	.notification {
+		position: absolute;
+	}
+
+	.notification .k-notification {
+		width: 530px;
+	}
+
+	.notification-parent {
+		position: relative;
+		height: 270px;
+	}
+
+	.k-notification-container {
+		margin: 6px 0;
 	}
 </style>
